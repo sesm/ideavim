@@ -18,13 +18,24 @@
 
 package com.maddyhome.idea.vim.ex.handler;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.encoding.EncodingRegistry;
 import com.maddyhome.idea.vim.VimPlugin;
 import com.maddyhome.idea.vim.ex.CommandHandler;
 import com.maddyhome.idea.vim.ex.CommandName;
 import com.maddyhome.idea.vim.ex.ExCommand;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 /**
  *
@@ -37,8 +48,57 @@ public class WriteHandler extends CommandHandler {
   }
 
   public boolean execute(@NotNull Editor editor, @NotNull DataContext context, @NotNull ExCommand cmd) {
-    VimPlugin.getFile().saveFile(editor, context);
+    String arg = cmd.getArgument();
+    final boolean forced;
+    forced = arg.startsWith("!");
+    if(forced) {
+      arg = arg.substring(1).trim();
+    }
+
+    if(arg.length() == 0) {
+      VimPlugin.getFile().saveFile(editor, context);
+    } else {
+      File out = new File(arg);
+      if(out.isFile() && !forced) {
+        new Notification(
+          VimPlugin.IDEAVIM_STICKY_NOTIFICATION_ID,
+          VimPlugin.IDEAVIM_NOTIFICATION_TITLE,
+          "E13: file exists (add ! to override)",
+          NotificationType.INFORMATION).notify(null);
+      }
+      try {
+        EncodingRegistry encodingRegistry = EncodingRegistry.getInstance();
+        VirtualFile file = FileDocumentManager.getInstance().getFile(editor.getDocument());
+        Charset encoding = encodingRegistry.getEncoding(file, true);
+        if(encoding == null) {
+          encoding = encodingRegistry.getDefaultCharset();
+        }
+        PrintWriter writer = new PrintWriter(arg, encoding.name());
+        String text = editor.getDocument().getText();
+        writer.print(text);
+        writer.close();
+      }
+      catch (FileNotFoundException e) {
+        return false;
+      }
+      catch (UnsupportedEncodingException e) {
+        return false;
+      }
+    }
 
     return true;
+
+    // TODO:
+    // - Save text fragment
+    // - Tab completion (no UI, like in gVim)
+    // - Handle file paths correctly relatively to current document root (gVim doesn't do this!)
+    // - Don't ask for override if the file has already been written to in scope of this session
+    //
+    // Qs:
+    // - What if the file we overwrite is the part of current project? Do we need to work with PSI, etc?
+    // - UI component for errors: standard error balloon or custom error panel at bottom?
+
+
+    // Idea: run terminal commands in terminal
   }
 }
