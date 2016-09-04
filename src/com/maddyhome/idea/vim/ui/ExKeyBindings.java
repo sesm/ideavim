@@ -86,5 +86,7 @@ public class ExKeyBindings {
     new KeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.SHIFT_MASK), ExEditorKit.pasteAction),
 
     new KeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_MASK), ExEditorKit.InsertRegister),
+
+    new KeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), ExEditorKit.AutoComplete),
   };
 }

@@ -116,6 +116,7 @@ public class ExEditorKit extends DefaultEditorKit {
   public static final String HistoryUpFilter = "history-up-filter";
   public static final String HistoryDownFilter = "history-down-filter";
   public static final String StartDigraph = "start-digraph";
+  public static final String AutoComplete = "auto-complete";
 
   @NotNull protected final Action[] exActions = new Action[]{
     new ExEditorKit.CancelEntryAction(),
@@ -132,6 +133,7 @@ public class ExEditorKit extends DefaultEditorKit {
     new ExEditorKit.ToggleInsertReplaceAction(),
     new ExEditorKit.StartDigraphAction(),
     new InsertRegisterAction(),
+    new AutoCompleteAction()
   };
 
   public static class DefaultExKeyHandler extends DefaultKeyTypedAction {
@@ -459,6 +461,16 @@ public class ExEditorKit extends DefaultEditorKit {
     }
   }
 
+  public static class AutoCompleteAction extends TextAction {
+    public AutoCompleteAction() {
+      super(AutoComplete);
+    }
+
+    @Override
+    public void actionPerformed(@NotNull ActionEvent e) {
+      logger.info("Autocomplete called!");
+    }
+  }
   private static ExEditorKit instance;
 
   private static final Logger logger = Logger.getInstance(ExEditorKit.class.getName());

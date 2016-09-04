@@ -61,16 +61,7 @@ public class ExTextField extends JTextField {
     loadKeymap(map, ExKeyBindings.getBindings(), actions);
     map.setDefaultAction(new ExEditorKit.DefaultExKeyHandler());
     setKeymap(map);
-    addFocusListener(new FocusListener() {
-      @Override
-      public void focusGained(FocusEvent e) {
-        setCaretPosition(getText().length());
-      }
-
-      @Override
-      public void focusLost(FocusEvent e) {
-      }
-    });
+    setFocusTraversalKeysEnabled(false);
 
     //origCaret = getCaret();
     //blockCaret = new BlockCaret();
